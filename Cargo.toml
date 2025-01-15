@@ -1,0 +1,8 @@
+[package]
+name = "cli_epub_reader"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+xml_reader = { path = "../xml_reader" }
+zip = "0.6"
