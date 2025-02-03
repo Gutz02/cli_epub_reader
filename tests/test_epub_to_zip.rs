@@ -11,23 +11,27 @@ fn test_file_not_found(){
 
 #[test]
 fn test_epub_folder_created(){
+    delete_directory( "src\\processed_files\\kate-chopin_short-fiction");
+
     let title = "kate-chopin_short-fiction".to_string();
     read_epub(&title);
     assert!(folder_exists(&"src\\processed_files\\kate-chopin_short-fiction".to_string()));
-    delete_directory( "src\\processed_files\\kate-chopin_short-fiction");
+
 }
 
 #[test]
 fn test_epub_folder_already_exist(){
+    delete_directory( "src\\processed_files\\kate-chopin_short-fiction");
     let folder_name = "kate-chopin_short-fiction".to_string();
     read_epub(&folder_name);
     let error = read_epub(&folder_name);
     assert_eq!(error, Err(MyError::FolderAlreadyExists));
-    delete_directory( "src\\processed_files\\kate-chopin_short-fiction");
 }
 
 #[test]
 fn test_zip_file_created(){
+    delete_directory( "src\\processed_files\\kate-chopin_short-fiction");
+
     let folder_name = "src\\new_files\\kate-chopin_short-fiction.epub".to_string();
     let zip_location = "src\\processed_files\\kate-chopin_short-fiction".to_string();
     let some_err = unzip_epub(&folder_name, &zip_location);
@@ -35,11 +39,13 @@ fn test_zip_file_created(){
     .expect("Failed to read directory")
     .count();
     assert_eq!(file_count, 3, "The number of extracted files is not 3");
-    delete_directory( "src\\processed_files\\kate-chopin_short-fiction");
+
 }
 
 #[test]
-fn read_content_xml(){
+fn test_read_content_xml(){
+    delete_directory( "src\\processed_files\\kate-chopin_short-fiction");
+
     let folder_name = "src\\new_files\\kate-chopin_short-fiction.epub".to_string();
     let zip_location = "src\\processed_files\\kate-chopin_short-fiction".to_string();
     unzip_epub(&folder_name, &zip_location);
@@ -47,6 +53,7 @@ fn read_content_xml(){
     let zip_location = "src\\processed_files\\kate-chopin_short-fiction".to_string();
     let rootfile_path : String = find_container(&zip_location).unwrap();
     assert_eq!(rootfile_path, "epub/content.opf");
+
 }
 
 #[test]

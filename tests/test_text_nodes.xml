@@ -1,0 +1,11 @@
+<head>
+    <p>This is some text</p>
+    <p>
+        <strong>Some bold text here </strong><em> Some italic text here </em>
+    </p>
+    <p>
+        <u> Some underlined text here </u><del> And some strikethrough text here </del>
+        <br/>
+        Perhaps I can even put a quote here? <blockquote>man suffers more in imagination than in reality</blockquote>
+    </p>
+</head>

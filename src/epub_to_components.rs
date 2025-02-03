@@ -135,7 +135,6 @@ pub fn format_table_contents(ordered_files : Vec<usize>, all_nodes: &Vec<Rc<Node
 }
 
 
-
 pub fn folder_exists(path: &String) -> bool {
     Path::new(path).is_dir()
 }

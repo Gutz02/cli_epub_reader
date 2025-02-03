@@ -1,0 +1,10 @@
+<body>
+    <article>
+        <h3> A Title </h3>
+        <p>Some Text</p>
+        <p>
+            <span></span>
+            <br/>
+        </p>
+    </article>
+</body>
