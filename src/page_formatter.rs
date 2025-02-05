@@ -19,8 +19,8 @@ const SUPPORTED_TEXT_NODES : [&str; 11 ] = [
     "strong", "b" , "em", "i", "u", "small" , "del", "ins", "blockquote", "q",  "p"
 ];
 
-const SUPPORTED_STRUCTURAL_NODES : [&str; 9 ] = [
-    "br", "hr", "h1", "h2", "h3", "h4", "h5", "h6", "p"
+const SUPPORTED_STRUCTURAL_NODES : [&str; 8 ] = [
+    "br", "hr", "h1", "h2", "h3", "h4", "h5", "h6"
 ];
 
 impl fmt::Display for Chapter {
@@ -45,18 +45,20 @@ pub struct Chapter {
     title : Option<String>,
     content : String,
     file_path : String,
-    all_nodes : Option<Vec<Rc<Node>>>
+    all_nodes : Option<Vec<Rc<Node>>>,
+    terminal_Size : (usize, usize),
 }
 
 
 impl Chapter {
 
-    pub fn new(file_path : String) -> Self{
+    pub fn new(file_path : String, term_size: (usize, usize)) -> Self{
         Chapter{
             title : None,
             content : String::new(),
             file_path : file_path,
-            all_nodes : None
+            all_nodes : None,
+            terminal_Size : term_size
         }
     }
 
@@ -116,25 +118,27 @@ impl Chapter {
 
     pub fn apply_format_(&mut self, node : &Rc<Node>){
 
-        for child in &node.get_children().clone(){
-            if child.get_name() == "content"{
-                self.apply_text(node);
-            }
+        if SUPPORTED_STRUCTURAL_NODES.contains(&node.get_name().as_str()) {
+            self.apply_structural(node);
+            return;
+        }
+        for (index, child) in node.get_children().clone().iter().enumerate() {
+            let is_last = index + 1 == node.get_children().len();
+            if child.get_name() == "content" {
+                self.apply_text(if is_last { node } else { child });
+            }        
             self.apply_format_(child);
         }
-        self.apply_structural(node);
+
     }
 
     fn apply_text(&mut self, node : &Rc<Node>){
-        if SUPPORTED_TEXT_NODES.contains(&node.get_name().as_str()){
-            self.content = format!("{}{}",self.content, Chapter::apply_text_node(node.get_contents().clone(), node.get_name()));
-        }
+        self.content = format!("{}{}",self.content, Chapter::apply_text_node(node.get_contents().clone(), node.get_name()));
+
     }
 
     fn apply_structural(&mut self, node : &Rc<Node>){
-        if SUPPORTED_STRUCTURAL_NODES.contains(&node.get_name().as_str()) {
-            self.content = format!("{}{}",self.content, Chapter::apply_structural_node(node.get_contents().clone(), node.get_name()));
-        }
+        self.content = format!("{}{}",self.content, self.apply_structural_node(node.get_contents().clone(), node.get_name()));
     }
 
     fn apply_text_node(text: Option<String>, node: &str) -> colored::ColoredString {
@@ -145,32 +149,56 @@ impl Chapter {
                 "u" | "ins"    => text.underline(),
                 "del"          => text.strikethrough(),
                 "blockquote" | "q" => format!("“{text}”").normal(),
-                "p" => text.normal(),
-                _ => String::new().normal(),
+                "p" => format!("{text}\n").normal(),
+                "title" =>  String::new().normal(),
+                _ => text.normal(),
             }
         } else {
             String::new().normal()
         }
     }
+
+    fn center_text(&self, text: &str, format : &str) -> String {
+        let text_width = text.chars().count();
+        let (width, _) = self.terminal_Size;
+         
+        if text_width >= width {
+            text.to_string()
+        } else {
+            let padding;
+
+            match format {
+                "h1" => padding = (width - text_width) / 2,
+                "h2" => padding = (width - text_width) / 3,
+                "h3" => padding = (width - text_width) / 4,
+                _ => return format!("{}\n", text)
+            }
+
+            let spaces = " ".repeat(padding);
+            format!("{}{}\n", spaces, text)
+        }
+    }
     
 
-    fn apply_structural_node(text: Option<String>, node: &str) -> colored::ColoredString{
-        if let Some(text) = text{
+    fn apply_structural_node(&self, text: Option<String>, node: &str) -> colored::ColoredString {
+        
+        if let Some(text) = text {
             match node {
-                "h1" => format!("\t\t\tHeading 1: {}\n",text).normal(),
-                "h2" => format!("\t\tHeading 2: {}\n",text).normal(),
-                "h3" => format!("\tHeading 3: {}\n",text).normal(),
+                "h1" => self.center_text(&text.underline(), "h1").bold(),
+                "h2" => self.center_text(&text.underline(), "h2").bold(),
+                "h3" => self.center_text(&text.underline(), "h3").bold(),
                 "p"  => "\n\n".normal(),
-                _ => String::new().normal(), 
+                _    => String::new().normal(), 
             }
         } else {
             match node {
-                "br" => "\n".to_string().normal(),
+                "br" => "\n".normal(),
                 "p"  => "\n\n".normal(),
-                _ => String::new().normal()
+                _    => String::new().normal(),
             }
         }
     }
+    
 
     fn newline(&mut self, node : &Rc<Node>){
         if node.get_name() == "p"{

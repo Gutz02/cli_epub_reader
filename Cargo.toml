@@ -7,3 +7,4 @@ edition = "2021"
 xml_reader = { path = "../xml_reader" }
 zip = "0.6"
 colored = "2.1.0"
+term_size = { version = "1.0.0-beta1" }

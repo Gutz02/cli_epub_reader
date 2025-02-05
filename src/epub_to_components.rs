@@ -53,7 +53,6 @@ pub fn unzip_epub(epub_path : &String, new_directory: &String) -> io::Result<()>
             io::copy(&mut file, &mut outfile)?;
         }
 
-        // println!("Extracted: {}", out_path.display());
     }
 
     println!("EPUB extraction complete!");
